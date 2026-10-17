@@ -1,0 +1,25 @@
+const express = require('express');
+const router = express.Router();
+
+let authors = [
+    { id: 1, name: 'Ana Garcia', email: 'ana@example.com', bio: 'Desarrolladora full-stack apasionada por Node.js' },
+    { id: 2, name: 'Carlos Ruiz', email: 'carlos@example.com', bio: 'Escritor tecnico especializado en base de datos' },
+    { id: 3, name: 'Maria Lopez', email: 'maria@example.com', bio: 'Ingeniera de software con foco en APIs REST' },
+];
+let nextId = 4;
+router.get('/', (req, res) => {
+    res.json(authors);
+});
+
+router.get('/:id', (req, res) => {
+    const id = Number(req.params.id);
+    if (Number.isNaN(id)) {
+        return res.status(400).json({ error: 'id must be a number' });
+    }
+    const author = authors.find(a => a.id === id);
+    if (!author) {
+        return res.status(404).json({ error: 'author not found'});
+    }
+    res.json(author);
+});
+module.exports = router;
