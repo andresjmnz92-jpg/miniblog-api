@@ -39,4 +39,25 @@ router.post('/', (req, res) => {
     res.status(201).json(newAuthor);
 });
 
+router.put('/:id', (req, res) => {
+    const id = Number(req.params.id);
+    if (Number.isNaN(id)) {
+        return res.status(400).json({ error: 'id must be a number'});
+    }
+    const author = authors.find(a => a.id === id);
+    if (!author) {
+        return res.status(404).json({ error: 'author not found'});
+    }
+    const { name, email, bio } = req.body;
+    if (name !== undefined && name.trim() === '') {
+        return res.status(400).json({ error: 'name cannot be empty'});
+    }
+    if (email !== undefined && authors.some(a => a.email === email && a.id !== id)) {
+        return res.status(400).json({ error: 'email already exist'});
+    }
+    if (name !== undefined) author.name = name;
+    if (email !== undefined) author.email = email;
+    if (bio !== undefined) author.bio = bio;
+    res.json(author);
+});
 module.exports = router;
