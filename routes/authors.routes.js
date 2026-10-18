@@ -60,4 +60,17 @@ router.put('/:id', (req, res) => {
     if (bio !== undefined) author.bio = bio;
     res.json(author);
 });
+
+router.delete('/:id', (req, res) => {
+    const id = Number(req.params.id);
+    if (Number.isNaN(id)) {
+        return res.status(400).json({ error: 'id must be a number'});
+    }
+    const index = authors.findIndex(a => a.id === id);
+    if (index === -1) {
+        return res.status(404).json({ error: 'author not found'});
+    }
+    authors.splice(index, 1);
+    res.status(204).send();
+});
 module.exports = router;
