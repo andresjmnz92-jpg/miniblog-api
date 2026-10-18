@@ -22,4 +22,21 @@ router.get('/:id', (req, res) => {
     }
     res.json(author);
 });
+
+router.post('/', (req, res) => {
+    const { name, email, bio } = req.body;
+    if (!name || name.trim() === '') {
+        return res.status(400).json({ error: 'name is required' });
+    }
+    if (!email) {
+        return res.status(400).json({ error: 'email is required' });
+    }
+    if (authors.some(a => a.email === email)) {
+        return res.status(400).json({ error: 'email already exists' });
+    }
+    const newAuthor = { id: nextId++, name, email, bio };
+    authors.push(newAuthor);
+    res.status(201).json(newAuthor);
+});
+
 module.exports = router;
