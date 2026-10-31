@@ -2,13 +2,6 @@ const express = require('express');
 const router = express.Router();
 const authorsService = require('../services/authors.service');
 
-
-let authors = [
-    { id: 1, name: 'Ana Garcia', email: 'ana@example.com', bio: 'Desarrolladora full-stack apasionada por Node.js' },
-    { id: 2, name: 'Carlos Ruiz', email: 'carlos@example.com', bio: 'Escritor tecnico especializado en base de datos' },
-    { id: 3, name: 'Maria Lopez', email: 'maria@example.com', bio: 'Ingeniera de software con foco en APIs REST' },
-];
-let nextId = 4;
 router.get('/', async (req, res) => {
     try {
         const authors = await authorsService.getAll();
@@ -36,7 +29,7 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
     const { name, email, bio } = req.body;
     if (!name || name.trim() === '') {
         return res.status(400).json({ error: 'name is required' });
@@ -44,46 +37,56 @@ router.post('/', (req, res) => {
     if (!email) {
         return res.status(400).json({ error: 'email is required' });
     }
-    if (authors.some(a => a.email === email)) {
-        return res.status(400).json({ error: 'email already exists' });
+    try {
+        const newAuthor = await authorsService.create(name, email, bio);
+        res.status(201).json(newAuthor);
+    } catch (error) {
+        if (error.code === '23505') {
+            return res.status(409).json({ error: 'email already exists' });
+        }
+        console.error(error);
+        res.status(500).json({ error: 'internal server error' });
     }
-    const newAuthor = { id: nextId++, name, email, bio };
-    authors.push(newAuthor);
-    res.status(201).json(newAuthor);
 });
 
-router.put('/:id', (req, res) => {
+router.put('/:id', async (req, res) => {
     const id = Number(req.params.id);
     if (Number.isNaN(id)) {
-        return res.status(400).json({ error: 'id must be a number'});
-    }
-    const author = authors.find(a => a.id === id);
-    if (!author) {
-        return res.status(404).json({ error: 'author not found'});
+        return res.status(400).json({ error: 'id must be a number' });
     }
     const { name, email, bio } = req.body;
     if (name !== undefined && name.trim() === '') {
-        return res.status(400).json({ error: 'name cannot be empty'});
+        return res.status(400).json({ error: 'name cannot be empty' });
     }
-    if (email !== undefined && authors.some(a => a.email === email && a.id !== id)) {
-        return res.status(400).json({ error: 'email already exist'});
+    try {
+        const author = await authorsService.update(id, name, email, bio);
+        if (!author) {
+            return res.status(404).json({ error: 'author not found' });
+        }
+        res.json(author);
+    } catch (error) {
+        if (error.code === '23505') {
+            return res.status(409).json({ error: 'email already exists' });
+        }
+        console.error(error);
+        res.status(500).json({ error: 'internal server error' });
     }
-    if (name !== undefined) author.name = name;
-    if (email !== undefined) author.email = email;
-    if (bio !== undefined) author.bio = bio;
-    res.json(author);
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
     const id = Number(req.params.id);
     if (Number.isNaN(id)) {
-        return res.status(400).json({ error: 'id must be a number'});
+        return res.status(400).json({ error: 'id must be a number' });
     }
-    const index = authors.findIndex(a => a.id === id);
-    if (index === -1) {
-        return res.status(404).json({ error: 'author not found'});
+    try {
+        const deleted = await authorsService.remove(id);
+        if (deleted === 0) {
+            return res.status(404).json({ error: 'author not found' });
+        }
+        res.status(204).send();
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'internal server error' });
     }
-    authors.splice(index, 1);
-    res.status(204).send();
 });
 module.exports = router;
