@@ -37,6 +37,8 @@ npm start      # modo normal
 
 La API queda en `http://localhost:3000`.
 
+La documentación interactiva (OpenAPI + Swagger UI) está en `http://localhost:3000/api-docs`.
+
 ## Endpoints
 
 ### Authors

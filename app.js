@@ -9,6 +9,11 @@ app.use('/authors', authorsRouter);
 const postsRouter = require('./routes/posts.routes');
 app.use('/posts', postsRouter);
 
+const swaggerUi = require('swagger-ui-express');
+const YAML = require('yamljs');
+const swaggerDocument = YAML.load(`${__dirname}/openapi.yaml`);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
 app.use((req, res) => {
     res.status(404).json({ error: 'route not found' });
 });
