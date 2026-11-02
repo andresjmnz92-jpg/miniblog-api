@@ -1,5 +1,8 @@
 const { loadEnvFile } = require('node:process');
-loadEnvFile('.env');
+const { existsSync } = require('node:fs');
+if (existsSync('.env')) {
+    loadEnvFile('.env');
+}
 const app = require('./app');
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
