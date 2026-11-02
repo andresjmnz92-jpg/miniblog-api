@@ -72,6 +72,25 @@ La documentación interactiva (OpenAPI + Swagger UI) está en `http://localhost:
 - `409` email repetido
 - `500` error del servidor
 
+## Deploy
+
+La API está publicada en Render:
+
+- URL pública: https://miniblog-api-30yg.onrender.com
+- Documentación: https://miniblog-api-30yg.onrender.com/api-docs
+- Ejemplo: https://miniblog-api-30yg.onrender.com/authors
+
+**Por qué Render y no Railway:** la consigna pide Railway, pero el 1 de noviembre de 2026 Railway no permitía crear cuentas nuevas ("Sign ups are currently disabled"), ni con Google ni con GitHub. Para no quedar sin deploy usé Render, que funciona igual: repo de GitHub conectado, variables de entorno y URL pública.
+
+**Cómo está montado:**
+
+1. Base de datos PostgreSQL en Render (región Ohio). Las tablas y los datos se cargaron desde mi PC con `psql <URL externa>` y `\i db/setup.sql` y `\i db/seed.sql`.
+2. Web Service conectado a este repo. Build: `npm install`. Start: `npm start`.
+3. Variable de entorno `DATABASE_URL` con la **URL interna** de la base, que solo funciona dentro de Render. `PORT` lo pone Render solo.
+4. En producción no hay archivo `.env`: `server.js` solo lo carga si existe.
+
+En el plan gratis el servicio se duerme tras 15 minutos sin uso, así que la primera petición puede tardar unos segundos.
+
 ## Tests
 
 Usan Vitest y Supertest contra la base de datos local:
